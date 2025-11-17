@@ -5,8 +5,6 @@
 	import InputSection from '$lib/components/InputSection.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import OutputRow from '$lib/components/OutputRow.svelte';
-	import AnimatedFrog from '$lib/components/AnimatedFrog.svelte';
-	import { onMount } from 'svelte';
 
 	// ===== TYPE DEFINITIONS =====
 
@@ -246,79 +244,11 @@
 		return `$${value.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}`;
 	}
 
-	// ===== FROG FACTS EASTER EGG =====
-
-	const FROG_FACTS = [
-		"🐸 Frogs can't swallow with their eyes open!",
-		"🐸 Some frogs can jump over 20 times their body length!",
-		"🐸 The glass frog has transparent skin - you can see its organs!",
-		"🐸 Frogs absorb water through their skin instead of drinking it.",
-		"🐸 A group of frogs is called an 'army' of frogs!",
-		"🐸 The world's smallest frog is smaller than a dime!",
-		"🐸 Frogs have been on Earth for over 200 million years.",
-		"🐸 Some frogs can freeze solid in winter and thaw out in spring!",
-		"🐸 Frogs use their eyes to help push food down their throat.",
-		"🐸 The Goliath frog can weigh as much as a newborn human baby!",
-		"🐸 Frogs don't need to drink water - they absorb it through their skin!",
-		"🐸 A frog's tongue is attached to the front of its mouth, not the back!",
-		"🐸 Some tree frogs can change color to match their surroundings.",
-		"🐸 Frogs have been to space! NASA sent frogs on space missions.",
-		"🐸 The wood frog can hold its pee for up to 8 months!"
-	];
-
-	let currentFact = $state<string | null>(null);
-	let factTimeout: ReturnType<typeof setTimeout> | null = null;
-
-	function showRandomFrogFact(): void {
-		const randomIndex = Math.floor(Math.random() * FROG_FACTS.length);
-		currentFact = FROG_FACTS[randomIndex];
-
-		if (factTimeout) {
-			clearTimeout(factTimeout);
-		}
-
-		factTimeout = setTimeout(() => {
-			currentFact = null;
-		}, 5000);
-	}
-
-	onMount(() => {
-		// Show a random frog fact every 30-60 seconds
-		const showFact = () => {
-			const delay = 30000 + Math.random() * 30000; // 30-60 seconds
-			setTimeout(() => {
-				showRandomFrogFact();
-				showFact(); // Schedule next fact
-			}, delay);
-		};
-		showFact();
-	});
 </script>
 
 <div class="min-h-screen bg-emerald-100">
 	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-		<!-- Frog Fact Toast -->
-		{#if currentFact}
-			<div class="fixed top-4 right-4 z-50 max-w-sm animate-slide-in">
-				<div class="rounded-lg bg-green-100 border-2 border-green-300 p-4 shadow-lg">
-					<div class="flex items-start gap-3">
-						<div class="text-2xl">💡</div>
-						<div class="flex-1">
-							<p class="text-sm font-medium text-green-900">{currentFact}</p>
-						</div>
-						<button
-							onclick={() => (currentFact = null)}
-							class="text-green-700 hover:text-green-900 transition-colors"
-						>
-							✕
-						</button>
-					</div>
-				</div>
-			</div>
-		{/if}
-
-		<div class="mb-8 flex items-center gap-3">
-			<AnimatedFrog monthlySavings={outputs.monthlySavings} />
+		<div class="mb-8">
 			<h1 class="text-3xl font-bold text-gray-900">
 				Mortgage Refinance Calculator<sup class="ml-1 text-sm font-normal text-gray-500">BETA</sup>
 			</h1>
@@ -446,19 +376,3 @@
 	</main>
 </div>
 
-<style>
-	@keyframes slide-in {
-		from {
-			transform: translateX(100%);
-			opacity: 0;
-		}
-		to {
-			transform: translateX(0);
-			opacity: 1;
-		}
-	}
-
-	:global(.animate-slide-in) {
-		animation: slide-in 0.3s ease-out;
-	}
-</style>
