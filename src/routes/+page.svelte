@@ -85,4 +85,115 @@
 		new_term: 30,
 		refi_cost_rate: 0.01
 	});
+
+	let outputs = $derived(
+		calculate(
+			inputs.original_loan_size,
+			inputs.original_loan_term,
+			inputs.rate,
+			inputs.months_paid,
+			inputs.down_payment,
+			inputs.new_rate,
+			inputs.new_term,
+			inputs.refi_cost_rate
+		)
+	);
 </script>
+
+<main>
+	<h1>Mortgage Refinance Calculator</h1>
+
+	<form>
+		<div>
+			<label for="original_loan_size">Original Loan Size ($):</label>
+			<input id="original_loan_size" type="number" bind:value={inputs.original_loan_size} />
+		</div>
+
+		<div>
+			<label for="original_loan_term">Original Loan Term (years):</label>
+			<input id="original_loan_term" type="number" bind:value={inputs.original_loan_term} />
+		</div>
+
+		<div>
+			<label for="rate">Interest Rate (decimal, e.g., 0.065 for 6.5%):</label>
+			<input id="rate" type="number" step="0.001" bind:value={inputs.rate} />
+		</div>
+
+		<div>
+			<label for="months_paid">Months Paid:</label>
+			<input id="months_paid" type="number" bind:value={inputs.months_paid} />
+		</div>
+
+		<div>
+			<label for="down_payment">Down Payment ($):</label>
+			<input id="down_payment" type="number" bind:value={inputs.down_payment} />
+		</div>
+
+		<div>
+			<label for="new_rate">New Interest Rate (decimal):</label>
+			<input id="new_rate" type="number" step="0.001" bind:value={inputs.new_rate} />
+		</div>
+
+		<div>
+			<label for="new_term">New Loan Term (years):</label>
+			<input id="new_term" type="number" bind:value={inputs.new_term} />
+		</div>
+
+		<div>
+			<label for="refi_cost_rate">Refi Cost Rate (decimal, e.g., 0.01 for 1%):</label>
+			<input id="refi_cost_rate" type="number" step="0.001" bind:value={inputs.refi_cost_rate} />
+		</div>
+	</form>
+
+	<section class="results">
+		<h2>Results</h2>
+
+		<div class="result-group">
+			<h3>Current Mortgage</h3>
+			<div class="result-item">
+				<span class="label">Original Monthly Payment:</span>
+				<span class="value">${outputs.original_monthly_payment.toFixed(2)}</span>
+			</div>
+			<div class="result-item">
+				<span class="label">Current Mortgage Balance:</span>
+				<span class="value">${outputs.current_mortgage_balance.toFixed(2)}</span>
+			</div>
+			<div class="result-item">
+				<span class="label">Current Equity:</span>
+				<span class="value">${outputs.current_equity.toFixed(2)}</span>
+			</div>
+		</div>
+
+		<div class="result-group">
+			<h3>Refinance Details</h3>
+			<div class="result-item">
+				<span class="label">New Loan Size:</span>
+				<span class="value">${outputs.new_loan_size.toFixed(2)}</span>
+			</div>
+			<div class="result-item">
+				<span class="label">Refinance Cost:</span>
+				<span class="value">${outputs.refi_cost.toFixed(2)}</span>
+			</div>
+			<div class="result-item">
+				<span class="label">New Monthly Payment:</span>
+				<span class="value">${outputs.new_monthly_payment.toFixed(2)}</span>
+			</div>
+		</div>
+
+		<div class="result-group highlight">
+			<h3>Savings Analysis</h3>
+			<div class="result-item">
+				<span class="label">Monthly Savings:</span>
+				<span class="value">${outputs.monthly_savings.toFixed(2)}</span>
+			</div>
+			<div class="result-item">
+				<span class="label">Total Savings:</span>
+				<span class="value">${outputs.total_savings.toFixed(2)}</span>
+			</div>
+			<div class="result-item">
+				<span class="label">Months to Break Even:</span>
+				<span class="value">{outputs.months_to_breakeven.toFixed(1)} months</span>
+			</div>
+		</div>
+	</section>
+</main>
