@@ -249,20 +249,20 @@
 
 	const FROG_FACTS = [
 		"🐸 Frogs can't swallow with their eyes open!",
-		"🐸 Some frogs can jump over 20 times their body length!",
-		"🐸 The glass frog has transparent skin - you can see its organs!",
-		"🐸 Frogs absorb water through their skin instead of drinking it.",
+		'🐸 Some frogs can jump over 20 times their body length!',
+		'🐸 The glass frog has transparent skin - you can see its organs!',
+		'🐸 Frogs absorb water through their skin instead of drinking it.',
 		"🐸 A group of frogs is called an 'army' of frogs!",
 		"🐸 The world's smallest frog is smaller than a dime!",
-		"🐸 Frogs have been on Earth for over 200 million years.",
-		"🐸 Some frogs can freeze solid in winter and thaw out in spring!",
-		"🐸 Frogs use their eyes to help push food down their throat.",
-		"🐸 The Goliath frog can weigh as much as a newborn human baby!",
+		'🐸 Frogs have been on Earth for over 200 million years.',
+		'🐸 Some frogs can freeze solid in winter and thaw out in spring!',
+		'🐸 Frogs use their eyes to help push food down their throat.',
+		'🐸 The Goliath frog can weigh as much as a newborn human baby!',
 		"🐸 Frogs don't need to drink water - they absorb it through their skin!",
 		"🐸 A frog's tongue is attached to the front of its mouth, not the back!",
-		"🐸 Some tree frogs can change color to match their surroundings.",
-		"🐸 Frogs have been to space! NASA sent frogs on space missions.",
-		"🐸 The wood frog can hold its pee for up to 8 months!"
+		'🐸 Some tree frogs can change color to match their surroundings.',
+		'🐸 Frogs have been to space! NASA sent frogs on space missions.',
+		'🐸 The wood frog can hold its pee for up to 8 months!'
 	];
 
 	let currentFact = $state<string | null>(null);
@@ -294,12 +294,12 @@
 	});
 </script>
 
-<div class="min-h-screen bg-blue-200">
+<div class="min-h-screen bg-blue-100">
 	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 		<!-- Frog Fact Toast -->
 		{#if currentFact}
-			<div class="fixed top-4 right-4 z-50 max-w-sm animate-slide-in">
-				<div class="rounded-lg bg-green-100 border-2 border-green-300 p-4 shadow-lg">
+			<div class="animate-slide-in fixed top-4 right-4 z-50 max-w-sm">
+				<div class="rounded-lg border-2 border-green-300 bg-green-100 p-4 shadow-lg">
 					<div class="flex items-start gap-3">
 						<div class="text-2xl">💡</div>
 						<div class="flex-1">
@@ -307,7 +307,7 @@
 						</div>
 						<button
 							onclick={() => (currentFact = null)}
-							class="text-green-700 hover:text-green-900 transition-colors"
+							class="text-green-700 transition-colors hover:text-green-900"
 						>
 							✕
 						</button>
@@ -332,6 +332,7 @@
 						label="Original Loan Size"
 						value={displayValues.originalLoanSize}
 						oninput={(e) => handleCurrencyInput('originalLoanSize', e)}
+						min={0}
 					/>
 
 					<NumberInput
@@ -339,6 +340,7 @@
 						label="Original Loan Term"
 						bind:value={inputs.originalLoanTerm}
 						unit="years"
+						min={0}
 					/>
 
 					<PercentInput
@@ -346,6 +348,7 @@
 						label="Interest Rate"
 						value={displayValues.rate}
 						oninput={(e) => handlePercentInput('rate', e)}
+						min={0}
 					/>
 
 					<NumberInput
@@ -353,6 +356,7 @@
 						label="Months Already Paid"
 						bind:value={inputs.monthsPaid}
 						unit="months"
+						min={0}
 					/>
 
 					<CurrencyInput
@@ -360,6 +364,7 @@
 						label="Down Payment"
 						value={displayValues.downPayment}
 						oninput={(e) => handleCurrencyInput('downPayment', e)}
+						min={0}
 					/>
 				</InputSection>
 
@@ -370,6 +375,7 @@
 						label="New Interest Rate"
 						value={displayValues.newRate}
 						oninput={(e) => handlePercentInput('newRate', e)}
+						min={0}
 					/>
 
 					<NumberInput
@@ -377,6 +383,7 @@
 						label="New Loan Term"
 						bind:value={inputs.newTerm}
 						unit="years"
+						min={0}
 					/>
 
 					<PercentInput
@@ -384,6 +391,7 @@
 						label="Refi Cost Rate"
 						value={displayValues.refiCostRate}
 						oninput={(e) => handlePercentInput('refiCostRate', e)}
+						min={0}
 					/>
 				</InputSection>
 			</div>
