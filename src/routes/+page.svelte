@@ -100,99 +100,213 @@
 	);
 </script>
 
-<main>
-	<h1>Mortgage Refinance Calculator</h1>
+<main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+	<h1 class="text-3xl font-bold text-gray-900 mb-8">Mortgage Refinance Calculator</h1>
 
-	<form>
-		<div>
-			<label for="original_loan_size">Original Loan Size ($):</label>
-			<input id="original_loan_size" type="number" bind:value={inputs.original_loan_size} />
-		</div>
+	<form class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg p-6 mb-8">
+		<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+			<div>
+				<label for="original_loan_size" class="block text-sm font-medium text-gray-700 mb-2">
+					Original Loan Size ($)
+				</label>
+				<input
+					id="original_loan_size"
+					type="number"
+					bind:value={inputs.original_loan_size}
+					class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+				/>
+			</div>
 
-		<div>
-			<label for="original_loan_term">Original Loan Term (years):</label>
-			<input id="original_loan_term" type="number" bind:value={inputs.original_loan_term} />
-		</div>
+			<div>
+				<label for="original_loan_term" class="block text-sm font-medium text-gray-700 mb-2">
+					Original Loan Term (years)
+				</label>
+				<input
+					id="original_loan_term"
+					type="number"
+					bind:value={inputs.original_loan_term}
+					class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+				/>
+			</div>
 
-		<div>
-			<label for="rate">Interest Rate (decimal, e.g., 0.065 for 6.5%):</label>
-			<input id="rate" type="number" step="0.001" bind:value={inputs.rate} />
-		</div>
+			<div>
+				<label for="rate" class="block text-sm font-medium text-gray-700 mb-2">
+					Interest Rate (decimal, e.g., 0.065 for 6.5%)
+				</label>
+				<input
+					id="rate"
+					type="number"
+					step="0.001"
+					bind:value={inputs.rate}
+					class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+				/>
+			</div>
 
-		<div>
-			<label for="months_paid">Months Paid:</label>
-			<input id="months_paid" type="number" bind:value={inputs.months_paid} />
-		</div>
+			<div>
+				<label for="months_paid" class="block text-sm font-medium text-gray-700 mb-2">
+					Months Paid
+				</label>
+				<input
+					id="months_paid"
+					type="number"
+					bind:value={inputs.months_paid}
+					class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+				/>
+			</div>
 
-		<div>
-			<label for="down_payment">Down Payment ($):</label>
-			<input id="down_payment" type="number" bind:value={inputs.down_payment} />
-		</div>
+			<div>
+				<label for="down_payment" class="block text-sm font-medium text-gray-700 mb-2">
+					Down Payment ($)
+				</label>
+				<input
+					id="down_payment"
+					type="number"
+					bind:value={inputs.down_payment}
+					class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+				/>
+			</div>
 
-		<div>
-			<label for="new_rate">New Interest Rate (decimal):</label>
-			<input id="new_rate" type="number" step="0.001" bind:value={inputs.new_rate} />
-		</div>
+			<div>
+				<label for="new_rate" class="block text-sm font-medium text-gray-700 mb-2">
+					New Interest Rate (decimal)
+				</label>
+				<input
+					id="new_rate"
+					type="number"
+					step="0.001"
+					bind:value={inputs.new_rate}
+					class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+				/>
+			</div>
 
-		<div>
-			<label for="new_term">New Loan Term (years):</label>
-			<input id="new_term" type="number" bind:value={inputs.new_term} />
-		</div>
+			<div>
+				<label for="new_term" class="block text-sm font-medium text-gray-700 mb-2">
+					New Loan Term (years)
+				</label>
+				<input
+					id="new_term"
+					type="number"
+					bind:value={inputs.new_term}
+					class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+				/>
+			</div>
 
-		<div>
-			<label for="refi_cost_rate">Refi Cost Rate (decimal, e.g., 0.01 for 1%):</label>
-			<input id="refi_cost_rate" type="number" step="0.001" bind:value={inputs.refi_cost_rate} />
+			<div>
+				<label for="refi_cost_rate" class="block text-sm font-medium text-gray-700 mb-2">
+					Refi Cost Rate (decimal, e.g., 0.01 for 1%)
+				</label>
+				<input
+					id="refi_cost_rate"
+					type="number"
+					step="0.001"
+					bind:value={inputs.refi_cost_rate}
+					class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+				/>
+			</div>
 		</div>
 	</form>
 
-	<section class="results">
-		<h2>Results</h2>
+	<section>
+		<h2 class="text-2xl font-bold text-gray-900 mb-6">Results</h2>
 
-		<div class="result-group">
-			<h3>Current Mortgage</h3>
-			<div class="result-item">
-				<span class="label">Original Monthly Payment:</span>
-				<span class="value">${outputs.original_monthly_payment.toFixed(2)}</span>
+		<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+			<!-- Current Mortgage -->
+			<div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg p-6">
+				<h3 class="text-lg font-semibold text-gray-900 mb-4">Current Mortgage</h3>
+				<div class="space-y-3">
+					<div class="flex justify-between items-baseline">
+						<span class="text-sm text-gray-600">Original Monthly Payment:</span>
+						<span class="text-lg font-semibold text-gray-900">
+							${outputs.original_monthly_payment.toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							})}
+						</span>
+					</div>
+					<div class="flex justify-between items-baseline">
+						<span class="text-sm text-gray-600">Current Mortgage Balance:</span>
+						<span class="text-lg font-semibold text-gray-900">
+							${outputs.current_mortgage_balance.toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							})}
+						</span>
+					</div>
+					<div class="flex justify-between items-baseline">
+						<span class="text-sm text-gray-600">Current Equity:</span>
+						<span class="text-lg font-semibold text-gray-900">
+							${outputs.current_equity.toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							})}
+						</span>
+					</div>
+				</div>
 			</div>
-			<div class="result-item">
-				<span class="label">Current Mortgage Balance:</span>
-				<span class="value">${outputs.current_mortgage_balance.toFixed(2)}</span>
-			</div>
-			<div class="result-item">
-				<span class="label">Current Equity:</span>
-				<span class="value">${outputs.current_equity.toFixed(2)}</span>
-			</div>
-		</div>
 
-		<div class="result-group">
-			<h3>Refinance Details</h3>
-			<div class="result-item">
-				<span class="label">New Loan Size:</span>
-				<span class="value">${outputs.new_loan_size.toFixed(2)}</span>
+			<!-- Refinance Details -->
+			<div class="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-lg p-6">
+				<h3 class="text-lg font-semibold text-gray-900 mb-4">Refinance Details</h3>
+				<div class="space-y-3">
+					<div class="flex justify-between items-baseline">
+						<span class="text-sm text-gray-600">New Loan Size:</span>
+						<span class="text-lg font-semibold text-gray-900">
+							${outputs.new_loan_size.toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							})}
+						</span>
+					</div>
+					<div class="flex justify-between items-baseline">
+						<span class="text-sm text-gray-600">Refinance Cost:</span>
+						<span class="text-lg font-semibold text-gray-900">
+							${outputs.refi_cost.toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							})}
+						</span>
+					</div>
+					<div class="flex justify-between items-baseline">
+						<span class="text-sm text-gray-600">New Monthly Payment:</span>
+						<span class="text-lg font-semibold text-gray-900">
+							${outputs.new_monthly_payment.toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							})}
+						</span>
+					</div>
+				</div>
 			</div>
-			<div class="result-item">
-				<span class="label">Refinance Cost:</span>
-				<span class="value">${outputs.refi_cost.toFixed(2)}</span>
-			</div>
-			<div class="result-item">
-				<span class="label">New Monthly Payment:</span>
-				<span class="value">${outputs.new_monthly_payment.toFixed(2)}</span>
-			</div>
-		</div>
 
-		<div class="result-group highlight">
-			<h3>Savings Analysis</h3>
-			<div class="result-item">
-				<span class="label">Monthly Savings:</span>
-				<span class="value">${outputs.monthly_savings.toFixed(2)}</span>
-			</div>
-			<div class="result-item">
-				<span class="label">Total Savings:</span>
-				<span class="value">${outputs.total_savings.toFixed(2)}</span>
-			</div>
-			<div class="result-item">
-				<span class="label">Months to Break Even:</span>
-				<span class="value">{outputs.months_to_breakeven.toFixed(1)} months</span>
+			<!-- Savings Analysis -->
+			<div class="bg-gradient-to-br from-indigo-50 to-blue-50 shadow-sm ring-1 ring-indigo-200 rounded-lg p-6">
+				<h3 class="text-lg font-semibold text-indigo-900 mb-4">Savings Analysis</h3>
+				<div class="space-y-3">
+					<div class="flex justify-between items-baseline">
+						<span class="text-sm text-indigo-700">Monthly Savings:</span>
+						<span class="text-lg font-bold text-indigo-900">
+							${outputs.monthly_savings.toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							})}
+						</span>
+					</div>
+					<div class="flex justify-between items-baseline">
+						<span class="text-sm text-indigo-700">Total Savings:</span>
+						<span class="text-lg font-bold text-indigo-900">
+							${outputs.total_savings.toLocaleString('en-US', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							})}
+						</span>
+					</div>
+					<div class="flex justify-between items-baseline">
+						<span class="text-sm text-indigo-700">Months to Break Even:</span>
+						<span class="text-lg font-bold text-indigo-900">
+							{outputs.months_to_breakeven.toFixed(1)} months
+						</span>
+					</div>
+				</div>
 			</div>
 		</div>
 	</section>
