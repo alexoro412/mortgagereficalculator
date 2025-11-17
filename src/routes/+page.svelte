@@ -246,9 +246,12 @@
 </script>
 
 <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-	<h1 class="mb-8 text-3xl font-bold text-gray-900">
-		Mortgage Refinance Calculator<sup class="ml-1 text-sm font-normal text-gray-500">BETA</sup>
-	</h1>
+	<div class="mb-8 flex items-center gap-3">
+		<img src="/frog.svg" alt="Frog logo" class="h-12 w-12" />
+		<h1 class="text-3xl font-bold text-gray-900">
+			Mortgage Refinance Calculator<sup class="ml-1 text-sm font-normal text-gray-500">BETA</sup>
+		</h1>
+	</div>
 
 	<div class="flex flex-col gap-8 lg:flex-row lg:items-start">
 		<!-- Left Column: Inputs -->
