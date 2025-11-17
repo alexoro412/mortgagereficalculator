@@ -5,6 +5,7 @@
 	import InputSection from '$lib/components/InputSection.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import OutputRow from '$lib/components/OutputRow.svelte';
+	import { onMount } from 'svelte';
 
 	// ===== TYPE DEFINITIONS =====
 
@@ -244,135 +245,231 @@
 		return `$${value.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}`;
 	}
 
+	// ===== FROG FACTS EASTER EGG =====
+
+	const FROG_FACTS = [
+		"🐸 Frogs can't swallow with their eyes open!",
+		"🐸 Some frogs can jump over 20 times their body length!",
+		"🐸 The glass frog has transparent skin - you can see its organs!",
+		"🐸 Frogs absorb water through their skin instead of drinking it.",
+		"🐸 A group of frogs is called an 'army' of frogs!",
+		"🐸 The world's smallest frog is smaller than a dime!",
+		"🐸 Frogs have been on Earth for over 200 million years.",
+		"🐸 Some frogs can freeze solid in winter and thaw out in spring!",
+		"🐸 Frogs use their eyes to help push food down their throat.",
+		"🐸 The Goliath frog can weigh as much as a newborn human baby!",
+		"🐸 Frogs don't need to drink water - they absorb it through their skin!",
+		"🐸 A frog's tongue is attached to the front of its mouth, not the back!",
+		"🐸 Some tree frogs can change color to match their surroundings.",
+		"🐸 Frogs have been to space! NASA sent frogs on space missions.",
+		"🐸 The wood frog can hold its pee for up to 8 months!"
+	];
+
+	let currentFact = $state<string | null>(null);
+	let factTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function showRandomFrogFact(): void {
+		const randomIndex = Math.floor(Math.random() * FROG_FACTS.length);
+		currentFact = FROG_FACTS[randomIndex];
+
+		if (factTimeout) {
+			clearTimeout(factTimeout);
+		}
+
+		factTimeout = setTimeout(() => {
+			currentFact = null;
+		}, 5000);
+	}
+
+	onMount(() => {
+		// Show a random frog fact every 30-60 seconds
+		const showFact = () => {
+			const delay = 30000 + Math.random() * 30000; // 30-60 seconds
+			setTimeout(() => {
+				showRandomFrogFact();
+				showFact(); // Schedule next fact
+			}, delay);
+		};
+		showFact();
+	});
 </script>
 
-<div class="min-h-screen bg-emerald-100">
+<div class="min-h-screen bg-blue-200">
 	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+		<!-- Frog Fact Toast -->
+		{#if currentFact}
+			<div class="fixed top-4 right-4 z-50 max-w-sm animate-slide-in">
+				<div class="rounded-lg bg-green-100 border-2 border-green-300 p-4 shadow-lg">
+					<div class="flex items-start gap-3">
+						<div class="text-2xl">💡</div>
+						<div class="flex-1">
+							<p class="text-sm font-medium text-green-900">{currentFact}</p>
+						</div>
+						<button
+							onclick={() => (currentFact = null)}
+							class="text-green-700 hover:text-green-900 transition-colors"
+						>
+							✕
+						</button>
+					</div>
+				</div>
+			</div>
+		{/if}
+
 		<div class="mb-8">
 			<h1 class="text-3xl font-bold text-gray-900">
 				Mortgage Refinance Calculator<sup class="ml-1 text-sm font-normal text-gray-500">BETA</sup>
 			</h1>
 		</div>
 
-	<div class="flex flex-col gap-8 lg:flex-row lg:items-start">
-		<!-- Left Column: Inputs -->
-		<div class="space-y-6">
-			<!-- Current Mortgage Section -->
-			<InputSection title="Current Mortgage">
-				<CurrencyInput
-					id="originalLoanSize"
-					label="Original Loan Size"
-					value={displayValues.originalLoanSize}
-					oninput={(e) => handleCurrencyInput('originalLoanSize', e)}
-				/>
-
-				<NumberInput
-					id="originalLoanTerm"
-					label="Original Loan Term"
-					bind:value={inputs.originalLoanTerm}
-					unit="years"
-				/>
-
-				<PercentInput
-					id="rate"
-					label="Interest Rate"
-					value={displayValues.rate}
-					oninput={(e) => handlePercentInput('rate', e)}
-				/>
-
-				<NumberInput
-					id="monthsPaid"
-					label="Months Already Paid"
-					bind:value={inputs.monthsPaid}
-					unit="months"
-				/>
-
-				<CurrencyInput
-					id="downPayment"
-					label="Down Payment"
-					value={displayValues.downPayment}
-					oninput={(e) => handleCurrencyInput('downPayment', e)}
-				/>
-			</InputSection>
-
-			<!-- Refinance Options Section -->
-			<InputSection title="Refinance Options">
-				<PercentInput
-					id="newRate"
-					label="New Interest Rate"
-					value={displayValues.newRate}
-					oninput={(e) => handlePercentInput('newRate', e)}
-				/>
-
-				<NumberInput
-					id="newTerm"
-					label="New Loan Term"
-					bind:value={inputs.newTerm}
-					unit="years"
-				/>
-
-				<PercentInput
-					id="refiCostRate"
-					label="Refi Cost Rate"
-					value={displayValues.refiCostRate}
-					oninput={(e) => handlePercentInput('refiCostRate', e)}
-				/>
-			</InputSection>
-		</div>
-
-		<!-- Right Column: Results -->
-		<div class="space-y-6">
-			<!-- Current Mortgage -->
-			<Card title="Current Mortgage">
-				<OutputRow label="Original Monthly Payment:" value={formatCurrencyOutput(outputs.originalMonthlyPayment)} />
-				<OutputRow label="Current Mortgage Balance:" value={formatCurrencyOutput(outputs.currentMortgageBalance)} />
-				<OutputRow label="Current Equity:" value={formatCurrencyOutput(outputs.currentEquity)} />
-			</Card>
-
-			<!-- Refinance Details -->
-			<Card title="Refinance Details">
-				<OutputRow label="New Loan Size:" value={formatCurrencyOutput(outputs.newLoanSize)} />
-				<OutputRow label="Refinance Cost:" value={formatCurrencyOutput(outputs.refiCost)} />
-				<OutputRow label="New Monthly Payment:" value={formatCurrencyOutput(outputs.newMonthlyPayment)} />
-			</Card>
-
-			<!-- Savings Analysis -->
-			<Card
-				title={outputs.monthlySavings > 0 ? 'Savings Analysis' : 'Cost Analysis'}
-				class={outputs.monthlySavings > 0
-					? 'bg-gradient-to-br from-green-50 to-emerald-50 ring-green-200'
-					: 'bg-gradient-to-br from-red-50 to-rose-50 ring-red-200'}
-			>
-				{#if outputs.monthlySavings <= 0}
-					<div class="mb-4 rounded-md border border-red-200 bg-red-100 p-3">
-						<p class="text-sm text-red-800">
-							⚠️ <strong>Warning:</strong> This refinance will cost you more money.
-						</p>
-					</div>
-				{/if}
-
-				<OutputRow
-					label={outputs.monthlySavings > 0 ? 'Monthly Savings:' : 'Monthly Cost:'}
-					value={formatCurrencyOutput(Math.abs(outputs.monthlySavings))}
-					valueClass="text-lg font-bold {outputs.monthlySavings > 0 ? 'text-green-900' : 'text-red-900'}"
-				/>
-
-				<OutputRow
-					label={outputs.monthlySavings > 0 ? 'Total Savings:' : 'Total Cost:'}
-					value={formatCurrencyOutput(Math.abs(outputs.totalSavings))}
-					valueClass="text-lg font-bold {outputs.monthlySavings > 0 ? 'text-green-900' : 'text-red-900'}"
-				/>
-
-				{#if outputs.monthlySavings > 0}
-					<OutputRow
-						label="Months to Break Even:"
-						value="{outputs.monthsToBreakeven.toFixed(1)} months"
-						valueClass="text-lg font-bold text-green-900"
+		<div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+			<!-- Left Column: Inputs -->
+			<div class="space-y-6">
+				<!-- Current Mortgage Section -->
+				<InputSection title="Current Mortgage">
+					<CurrencyInput
+						id="originalLoanSize"
+						label="Original Loan Size"
+						value={displayValues.originalLoanSize}
+						oninput={(e) => handleCurrencyInput('originalLoanSize', e)}
 					/>
-				{/if}
-			</Card>
+
+					<NumberInput
+						id="originalLoanTerm"
+						label="Original Loan Term"
+						bind:value={inputs.originalLoanTerm}
+						unit="years"
+					/>
+
+					<PercentInput
+						id="rate"
+						label="Interest Rate"
+						value={displayValues.rate}
+						oninput={(e) => handlePercentInput('rate', e)}
+					/>
+
+					<NumberInput
+						id="monthsPaid"
+						label="Months Already Paid"
+						bind:value={inputs.monthsPaid}
+						unit="months"
+					/>
+
+					<CurrencyInput
+						id="downPayment"
+						label="Down Payment"
+						value={displayValues.downPayment}
+						oninput={(e) => handleCurrencyInput('downPayment', e)}
+					/>
+				</InputSection>
+
+				<!-- Refinance Options Section -->
+				<InputSection title="Refinance Options">
+					<PercentInput
+						id="newRate"
+						label="New Interest Rate"
+						value={displayValues.newRate}
+						oninput={(e) => handlePercentInput('newRate', e)}
+					/>
+
+					<NumberInput
+						id="newTerm"
+						label="New Loan Term"
+						bind:value={inputs.newTerm}
+						unit="years"
+					/>
+
+					<PercentInput
+						id="refiCostRate"
+						label="Refi Cost Rate"
+						value={displayValues.refiCostRate}
+						oninput={(e) => handlePercentInput('refiCostRate', e)}
+					/>
+				</InputSection>
+			</div>
+
+			<!-- Right Column: Results -->
+			<div class="space-y-6">
+				<!-- Current Mortgage -->
+				<Card title="Current Mortgage">
+					<OutputRow
+						label="Original Monthly Payment:"
+						value={formatCurrencyOutput(outputs.originalMonthlyPayment)}
+					/>
+					<OutputRow
+						label="Current Mortgage Balance:"
+						value={formatCurrencyOutput(outputs.currentMortgageBalance)}
+					/>
+					<OutputRow label="Current Equity:" value={formatCurrencyOutput(outputs.currentEquity)} />
+				</Card>
+
+				<!-- Refinance Details -->
+				<Card title="Refinance Details">
+					<OutputRow label="New Loan Size:" value={formatCurrencyOutput(outputs.newLoanSize)} />
+					<OutputRow label="Refinance Cost:" value={formatCurrencyOutput(outputs.refiCost)} />
+					<OutputRow
+						label="New Monthly Payment:"
+						value={formatCurrencyOutput(outputs.newMonthlyPayment)}
+					/>
+				</Card>
+
+				<!-- Savings Analysis -->
+				<Card
+					title={outputs.monthlySavings > 0 ? 'Savings Analysis' : 'Cost Analysis'}
+					class={outputs.monthlySavings > 0
+						? 'bg-gradient-to-br from-green-50 to-emerald-50 ring-green-200'
+						: 'bg-gradient-to-br from-red-50 to-rose-50 ring-red-200'}
+				>
+					{#if outputs.monthlySavings <= 0}
+						<div class="mb-4 rounded-md border border-red-200 bg-red-100 p-3">
+							<p class="text-sm text-red-800">
+								⚠️ <strong>Warning:</strong> This refinance will cost you more money.
+							</p>
+						</div>
+					{/if}
+
+					<OutputRow
+						label={outputs.monthlySavings > 0 ? 'Monthly Savings:' : 'Monthly Cost:'}
+						value={formatCurrencyOutput(Math.abs(outputs.monthlySavings))}
+						valueClass="text-lg font-bold {outputs.monthlySavings > 0
+							? 'text-green-900'
+							: 'text-red-900'}"
+					/>
+
+					<OutputRow
+						label={outputs.monthlySavings > 0 ? 'Total Savings:' : 'Total Cost:'}
+						value={formatCurrencyOutput(Math.abs(outputs.totalSavings))}
+						valueClass="text-lg font-bold {outputs.monthlySavings > 0
+							? 'text-green-900'
+							: 'text-red-900'}"
+					/>
+
+					{#if outputs.monthlySavings > 0}
+						<OutputRow
+							label="Months to Break Even:"
+							value="{outputs.monthsToBreakeven.toFixed(1)} months"
+							valueClass="text-lg font-bold text-green-900"
+						/>
+					{/if}
+				</Card>
+			</div>
 		</div>
-	</div>
 	</main>
 </div>
 
+<style>
+	@keyframes slide-in {
+		from {
+			transform: translateX(100%);
+			opacity: 0;
+		}
+		to {
+			transform: translateX(0);
+			opacity: 1;
+		}
+	}
+
+	:global(.animate-slide-in) {
+		animation: slide-in 0.3s ease-out;
+	}
+</style>
