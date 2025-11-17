@@ -1,106 +1,172 @@
 <script lang="ts">
-	function pmt(ir: number, np: number, pv: number) {
-		/*
-		 * ir   - interest rate per month
-		 * np   - number of periods (months)
-		 * pv   - present value
-		 * fv   - future value
-		 * type - when the payments are due:
-		 *        0: end of the period, e.g. end of month (default)
-		 *        1: beginning of period
-		 *
-		 * https://stackoverflow.com/questions/5294074/pmt-function-in-javascript
-		 */
-		var pmt, pvif;
+	// ===== TYPE DEFINITIONS =====
 
-		if (ir === 0) return -pv / np;
+	type CurrencyField = 'originalLoanSize' | 'downPayment';
+	type PercentField = 'rate' | 'newRate' | 'refiCostRate';
 
-		pvif = Math.pow(1 + ir, np);
-		pmt = (-ir * (pv * pvif)) / (pvif - 1);
-
-		return pmt;
+	interface MortgageInputs {
+		originalLoanSize: number;
+		originalLoanTerm: number;
+		rate: number;
+		monthsPaid: number;
+		downPayment: number;
+		newRate: number;
+		newTerm: number;
+		refiCostRate: number;
 	}
 
-	function pv(rate: number, nper: number, pmt: number) {
-		let pv_value;
-		if (rate == 0) {
-			// Interest rate is 0
-			pv_value = -(pmt * nper);
-		} else {
-			let x = Math.pow(1 + rate, -nper);
-			let y = Math.pow(1 + rate, nper);
-			pv_value = -(x * (rate - pmt + y * pmt)) / rate;
+	interface DisplayValues {
+		originalLoanSize: string;
+		rate: string;
+		downPayment: string;
+		newRate: string;
+		refiCostRate: string;
+	}
+
+	interface CalculationResults {
+		originalMonthlyPayment: number;
+		currentMortgageBalance: number;
+		currentEquity: number;
+		newLoanSize: number;
+		refiCost: number;
+		newMonthlyPayment: number;
+		monthlySavings: number;
+		totalSavings: number;
+		monthsToBreakeven: number;
+	}
+
+	// ===== CONSTANTS =====
+
+	const MONTHS_PER_YEAR = 12;
+	const COMMA_REGEX = /,/g;
+	const PERCENT_REGEX = /%/g;
+	const CURRENCY_FORMAT_OPTIONS: Intl.NumberFormatOptions = {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2
+	};
+
+	// ===== FINANCIAL CALCULATIONS =====
+
+	/**
+	 * Calculate monthly payment for a loan
+	 * @param monthlyInterestRate - Interest rate per month (annual rate / 12)
+	 * @param numberOfPeriods - Number of periods (months)
+	 * @param presentValue - Present value (loan amount, typically negative)
+	 * @returns Monthly payment amount
+	 *
+	 * Based on: https://stackoverflow.com/questions/5294074/pmt-function-in-javascript
+	 */
+	function calculateMonthlyPayment(
+		monthlyInterestRate: number,
+		numberOfPeriods: number,
+		presentValue: number
+	): number {
+		if (monthlyInterestRate === 0) {
+			return -presentValue / numberOfPeriods;
 		}
-		return pv_value;
+
+		const presentValueInterestFactor = Math.pow(1 + monthlyInterestRate, numberOfPeriods);
+		const paymentAmount =
+			(-monthlyInterestRate * (presentValue * presentValueInterestFactor)) /
+			(presentValueInterestFactor - 1);
+
+		return paymentAmount;
 	}
 
-	function calculate(
-		original_loan_size: number,
-		original_loan_term: number,
-		rate: number,
-		months_paid: number,
-		down_payment: number,
-		new_rate: number,
-		new_term: number,
-		refi_cost_rate: number
-	) {
-		let original_monthly_payment = pmt(rate / 12, original_loan_term * 12, -original_loan_size);
-		let current_mortgage_balance = pv(
-			rate / 12,
-			original_loan_term * 12 - months_paid,
-			-original_monthly_payment
+	/**
+	 * Calculate present value (remaining loan balance)
+	 * @param monthlyRate - Interest rate per month
+	 * @param numberOfPeriods - Number of remaining periods
+	 * @param monthlyPayment - Monthly payment amount
+	 * @returns Present value (remaining balance)
+	 */
+	function calculatePresentValue(
+		monthlyRate: number,
+		numberOfPeriods: number,
+		monthlyPayment: number
+	): number {
+		if (monthlyRate === 0) {
+			return -(monthlyPayment * numberOfPeriods);
+		}
+
+		const discountFactor = Math.pow(1 + monthlyRate, -numberOfPeriods);
+		const compoundFactor = Math.pow(1 + monthlyRate, numberOfPeriods);
+		const presentValue =
+			-(discountFactor * (monthlyRate - monthlyPayment + compoundFactor * monthlyPayment)) /
+			monthlyRate;
+
+		return presentValue;
+	}
+
+	/**
+	 * Calculate refinance analysis
+	 */
+	function calculate(inputs: MortgageInputs): CalculationResults {
+		const {
+			originalLoanSize,
+			originalLoanTerm,
+			rate,
+			monthsPaid,
+			downPayment,
+			newRate,
+			newTerm,
+			refiCostRate
+		} = inputs;
+
+		// Calculate current mortgage details
+		const originalMonthlyPayment = calculateMonthlyPayment(
+			rate / MONTHS_PER_YEAR,
+			originalLoanTerm * MONTHS_PER_YEAR,
+			-originalLoanSize
 		);
-		let current_equity = original_loan_size - current_mortgage_balance + down_payment;
-		let current_ltv = original_loan_size / (original_loan_size + down_payment);
 
-		// refi calcs
-		let new_loan_size = current_mortgage_balance;
-		let refi_cost = refi_cost_rate * new_loan_size;
+		const currentMortgageBalance = calculatePresentValue(
+			rate / MONTHS_PER_YEAR,
+			originalLoanTerm * MONTHS_PER_YEAR - monthsPaid,
+			-originalMonthlyPayment
+		);
 
-		let new_monthly_payment = pmt(new_rate / 12, new_term * 12, -new_loan_size);
-		let monthly_savings = original_monthly_payment - new_monthly_payment;
-		let total_savings = monthly_savings * original_loan_term * 12 - new_term;
-		let months_to_breakeven = refi_cost / monthly_savings;
+		const currentEquity = originalLoanSize - currentMortgageBalance + downPayment;
+
+		// Calculate refinance details
+		const newLoanSize = currentMortgageBalance;
+		const refiCost = refiCostRate * newLoanSize;
+
+		const newMonthlyPayment = calculateMonthlyPayment(
+			newRate / MONTHS_PER_YEAR,
+			newTerm * MONTHS_PER_YEAR,
+			-newLoanSize
+		);
+
+		const monthlySavings = originalMonthlyPayment - newMonthlyPayment;
+
+		// Total savings over the remaining life of the original loan
+		const remainingMonthsOnOriginalLoan = originalLoanTerm * MONTHS_PER_YEAR - monthsPaid;
+		const totalSavings = monthlySavings * remainingMonthsOnOriginalLoan;
+
+		const monthsToBreakeven = refiCost / monthlySavings;
 
 		return {
-			original_monthly_payment,
-			current_mortgage_balance,
-			current_equity,
-			new_loan_size,
-			refi_cost,
-			new_monthly_payment,
-			monthly_savings,
-			total_savings,
-			months_to_breakeven
+			originalMonthlyPayment,
+			currentMortgageBalance,
+			currentEquity,
+			newLoanSize,
+			refiCost,
+			newMonthlyPayment,
+			monthlySavings,
+			totalSavings,
+			monthsToBreakeven
 		};
 	}
 
-	let inputs = $state({
-		original_loan_size: 500_000,
-		original_loan_term: 30,
-		rate: 0.065,
-		months_paid: 0,
-		down_payment: 100_000,
-		new_rate: 0.05,
-		new_term: 30,
-		refi_cost_rate: 0.01
-	});
-
-	// Display values for formatting
-	let displayValues = $state({
-		original_loan_size: '500,000',
-		rate: '6.5',
-		down_payment: '100,000',
-		new_rate: '5',
-		refi_cost_rate: '1'
-	});
+	// ===== FORMATTING UTILITIES =====
 
 	function formatCurrency(value: number): string {
 		return value.toLocaleString('en-US');
 	}
 
 	function parseCurrency(str: string): number {
-		return parseFloat(str.replace(/,/g, '')) || 0;
+		return parseFloat(str.replace(COMMA_REGEX, '')) || 0;
 	}
 
 	function formatPercent(value: number): string {
@@ -108,11 +174,34 @@
 	}
 
 	function parsePercent(str: string): number {
-		const num = parseFloat(str.replace(/%/g, '')) || 0;
+		const num = parseFloat(str.replace(PERCENT_REGEX, '')) || 0;
 		return num / 100;
 	}
 
-	function handleCurrencyInput(field: 'original_loan_size' | 'down_payment', event: Event) {
+	// ===== STATE MANAGEMENT =====
+
+	let inputs = $state<MortgageInputs>({
+		originalLoanSize: 500_000,
+		originalLoanTerm: 30,
+		rate: 0.065,
+		monthsPaid: 0,
+		downPayment: 100_000,
+		newRate: 0.05,
+		newTerm: 30,
+		refiCostRate: 0.01
+	});
+
+	let displayValues = $state<DisplayValues>({
+		originalLoanSize: '500,000',
+		rate: '6.5',
+		downPayment: '100,000',
+		newRate: '5',
+		refiCostRate: '1'
+	});
+
+	// ===== EVENT HANDLERS =====
+
+	function handleCurrencyInput(field: CurrencyField, event: Event): void {
 		const target = event.target as HTMLInputElement;
 		const cursorPos = target.selectionStart || 0;
 		const oldLength = displayValues[field].length;
@@ -129,27 +218,18 @@
 		});
 	}
 
-	function handlePercentInput(field: 'rate' | 'new_rate' | 'refi_cost_rate', event: Event) {
+	function handlePercentInput(field: PercentField, event: Event): void {
 		const target = event.target as HTMLInputElement;
-		let value = target.value.replace(/%/g, '');
+		const value = target.value.replace(PERCENT_REGEX, '');
 
 		const numericValue = parseFloat(value) || 0;
 		inputs[field] = numericValue / 100;
 		displayValues[field] = numericValue.toString();
 	}
 
-	let outputs = $derived(
-		calculate(
-			inputs.original_loan_size,
-			inputs.original_loan_term,
-			inputs.rate,
-			inputs.months_paid,
-			inputs.down_payment,
-			inputs.new_rate,
-			inputs.new_term,
-			inputs.refi_cost_rate
-		)
-	);
+	// ===== DERIVED STATE =====
+
+	let outputs = $derived<CalculationResults>(calculate(inputs));
 </script>
 
 <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -165,7 +245,7 @@
 				<h2 class="mb-4 text-xl font-semibold text-gray-900">Current Mortgage</h2>
 				<div class="max-w-xs space-y-4">
 					<div>
-						<label for="original_loan_size" class="mb-2 block text-sm font-medium text-gray-700">
+						<label for="originalLoanSize" class="mb-2 block text-sm font-medium text-gray-700">
 							Original Loan Size
 						</label>
 						<div class="relative">
@@ -175,24 +255,24 @@
 								$
 							</span>
 							<input
-								id="original_loan_size"
+								id="originalLoanSize"
 								type="text"
-								value={displayValues.original_loan_size}
-								oninput={(e) => handleCurrencyInput('original_loan_size', e)}
+								value={displayValues.originalLoanSize}
+								oninput={(e) => handleCurrencyInput('originalLoanSize', e)}
 								class="block w-full rounded-md border-0 py-2 pr-3 pl-8 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
 							/>
 						</div>
 					</div>
 
 					<div>
-						<label for="original_loan_term" class="mb-2 block text-sm font-medium text-gray-700">
+						<label for="originalLoanTerm" class="mb-2 block text-sm font-medium text-gray-700">
 							Original Loan Term
 						</label>
 						<div class="relative">
 							<input
-								id="original_loan_term"
+								id="originalLoanTerm"
 								type="number"
-								bind:value={inputs.original_loan_term}
+								bind:value={inputs.originalLoanTerm}
 								class="block w-full rounded-md border-0 px-3 py-2 pr-16 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
 							/>
 							<span
@@ -224,14 +304,14 @@
 					</div>
 
 					<div>
-						<label for="months_paid" class="mb-2 block text-sm font-medium text-gray-700">
+						<label for="monthsPaid" class="mb-2 block text-sm font-medium text-gray-700">
 							Months Already Paid
 						</label>
 						<div class="relative">
 							<input
-								id="months_paid"
+								id="monthsPaid"
 								type="number"
-								bind:value={inputs.months_paid}
+								bind:value={inputs.monthsPaid}
 								class="block w-full rounded-md border-0 px-3 py-2 pr-20 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
 							/>
 							<span
@@ -243,7 +323,7 @@
 					</div>
 
 					<div>
-						<label for="down_payment" class="mb-2 block text-sm font-medium text-gray-700">
+						<label for="downPayment" class="mb-2 block text-sm font-medium text-gray-700">
 							Down Payment
 						</label>
 						<div class="relative">
@@ -253,10 +333,10 @@
 								$
 							</span>
 							<input
-								id="down_payment"
+								id="downPayment"
 								type="text"
-								value={displayValues.down_payment}
-								oninput={(e) => handleCurrencyInput('down_payment', e)}
+								value={displayValues.downPayment}
+								oninput={(e) => handleCurrencyInput('downPayment', e)}
 								class="block w-full rounded-md border-0 py-2 pr-3 pl-8 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
 							/>
 						</div>
@@ -269,15 +349,15 @@
 				<h2 class="mb-4 text-xl font-semibold text-gray-900">Refinance Options</h2>
 				<div class="max-w-xs space-y-4">
 					<div>
-						<label for="new_rate" class="mb-2 block text-sm font-medium text-gray-700">
+						<label for="newRate" class="mb-2 block text-sm font-medium text-gray-700">
 							New Interest Rate
 						</label>
 						<div class="relative">
 							<input
-								id="new_rate"
+								id="newRate"
 								type="text"
-								value={displayValues.new_rate}
-								oninput={(e) => handlePercentInput('new_rate', e)}
+								value={displayValues.newRate}
+								oninput={(e) => handlePercentInput('newRate', e)}
 								class="block w-full rounded-md border-0 px-3 py-2 pr-8 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
 							/>
 							<span
@@ -289,14 +369,14 @@
 					</div>
 
 					<div>
-						<label for="new_term" class="mb-2 block text-sm font-medium text-gray-700">
+						<label for="newTerm" class="mb-2 block text-sm font-medium text-gray-700">
 							New Loan Term
 						</label>
 						<div class="relative">
 							<input
-								id="new_term"
+								id="newTerm"
 								type="number"
-								bind:value={inputs.new_term}
+								bind:value={inputs.newTerm}
 								class="block w-full rounded-md border-0 px-3 py-2 pr-16 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
 							/>
 							<span
@@ -308,15 +388,15 @@
 					</div>
 
 					<div>
-						<label for="refi_cost_rate" class="mb-2 block text-sm font-medium text-gray-700">
+						<label for="refiCostRate" class="mb-2 block text-sm font-medium text-gray-700">
 							Refi Cost Rate
 						</label>
 						<div class="relative">
 							<input
-								id="refi_cost_rate"
+								id="refiCostRate"
 								type="text"
-								value={displayValues.refi_cost_rate}
-								oninput={(e) => handlePercentInput('refi_cost_rate', e)}
+								value={displayValues.refiCostRate}
+								oninput={(e) => handlePercentInput('refiCostRate', e)}
 								class="block w-full rounded-md border-0 px-3 py-2 pr-8 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
 							/>
 							<span
@@ -340,28 +420,19 @@
 						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">Original Monthly Payment:</span>
 							<span class="text-lg font-semibold text-gray-900">
-								${outputs.original_monthly_payment.toLocaleString('en-US', {
-									minimumFractionDigits: 2,
-									maximumFractionDigits: 2
-								})}
+								${outputs.originalMonthlyPayment.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
 							</span>
 						</div>
 						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">Current Mortgage Balance:</span>
 							<span class="text-lg font-semibold text-gray-900">
-								${outputs.current_mortgage_balance.toLocaleString('en-US', {
-									minimumFractionDigits: 2,
-									maximumFractionDigits: 2
-								})}
+								${outputs.currentMortgageBalance.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
 							</span>
 						</div>
 						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">Current Equity:</span>
 							<span class="text-lg font-semibold text-gray-900">
-								${outputs.current_equity.toLocaleString('en-US', {
-									minimumFractionDigits: 2,
-									maximumFractionDigits: 2
-								})}
+								${outputs.currentEquity.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
 							</span>
 						</div>
 					</div>
@@ -374,28 +445,19 @@
 						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">New Loan Size:</span>
 							<span class="text-lg font-semibold text-gray-900">
-								${outputs.new_loan_size.toLocaleString('en-US', {
-									minimumFractionDigits: 2,
-									maximumFractionDigits: 2
-								})}
+								${outputs.newLoanSize.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
 							</span>
 						</div>
 						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">Refinance Cost:</span>
 							<span class="text-lg font-semibold text-gray-900">
-								${outputs.refi_cost.toLocaleString('en-US', {
-									minimumFractionDigits: 2,
-									maximumFractionDigits: 2
-								})}
+								${outputs.refiCost.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
 							</span>
 						</div>
 						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">New Monthly Payment:</span>
 							<span class="text-lg font-semibold text-gray-900">
-								${outputs.new_monthly_payment.toLocaleString('en-US', {
-									minimumFractionDigits: 2,
-									maximumFractionDigits: 2
-								})}
+								${outputs.newMonthlyPayment.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
 							</span>
 						</div>
 					</div>
@@ -403,19 +465,19 @@
 
 				<!-- Savings Analysis -->
 				<div
-					class="max-w-md rounded-lg p-6 shadow-sm ring-1 {outputs.monthly_savings > 0
+					class="max-w-md rounded-lg p-6 shadow-sm ring-1 {outputs.monthlySavings > 0
 						? 'bg-gradient-to-br from-green-50 to-emerald-50 ring-green-200'
 						: 'bg-gradient-to-br from-red-50 to-rose-50 ring-red-200'}"
 				>
 					<h3
-						class="mb-4 text-lg font-semibold {outputs.monthly_savings > 0
+						class="mb-4 text-lg font-semibold {outputs.monthlySavings > 0
 							? 'text-green-900'
 							: 'text-red-900'}"
 					>
-						{outputs.monthly_savings > 0 ? 'Savings Analysis' : 'Cost Analysis'}
+						{outputs.monthlySavings > 0 ? 'Savings Analysis' : 'Cost Analysis'}
 					</h3>
 
-					{#if outputs.monthly_savings <= 0}
+					{#if outputs.monthlySavings <= 0}
 						<div class="mb-4 rounded-md border border-red-200 bg-red-100 p-3">
 							<p class="text-sm text-red-800">
 								⚠️ <strong>Warning:</strong> This refinance will cost you more money.
@@ -426,41 +488,38 @@
 					<div class="space-y-3">
 						<div class="flex items-baseline justify-between gap-4">
 							<span
-								class="text-sm {outputs.monthly_savings > 0 ? 'text-green-700' : 'text-red-700'}"
-								>{outputs.monthly_savings > 0 ? 'Monthly Savings:' : 'Monthly Cost:'}</span
+								class="text-sm {outputs.monthlySavings > 0 ? 'text-green-700' : 'text-red-700'}"
+								>{outputs.monthlySavings > 0 ? 'Monthly Savings:' : 'Monthly Cost:'}</span
 							>
 							<span
-								class="text-lg font-bold {outputs.monthly_savings > 0
+								class="text-lg font-bold {outputs.monthlySavings > 0
 									? 'text-green-900'
 									: 'text-red-900'}"
 							>
-								${Math.abs(outputs.monthly_savings).toLocaleString('en-US', {
-									minimumFractionDigits: 2,
-									maximumFractionDigits: 2
-								})}
+								${Math.abs(outputs.monthlySavings).toLocaleString(
+									'en-US',
+									CURRENCY_FORMAT_OPTIONS
+								)}
 							</span>
 						</div>
 						<div class="flex items-baseline justify-between gap-4">
 							<span
-								class="text-sm {outputs.monthly_savings > 0 ? 'text-green-700' : 'text-red-700'}"
-								>{outputs.monthly_savings > 0 ? 'Total Savings:' : 'Total Cost:'}</span
+								class="text-sm {outputs.monthlySavings > 0 ? 'text-green-700' : 'text-red-700'}"
+								>{outputs.monthlySavings > 0 ? 'Total Savings:' : 'Total Cost:'}</span
 							>
 							<span
-								class="text-lg font-bold {outputs.monthly_savings > 0
+								class="text-lg font-bold {outputs.monthlySavings > 0
 									? 'text-green-900'
 									: 'text-red-900'}"
 							>
-								${Math.abs(outputs.total_savings).toLocaleString('en-US', {
-									minimumFractionDigits: 2,
-									maximumFractionDigits: 2
-								})}
+								${Math.abs(outputs.totalSavings).toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
 							</span>
 						</div>
-						{#if outputs.monthly_savings > 0}
+						{#if outputs.monthlySavings > 0}
 							<div class="flex items-baseline justify-between gap-4">
 								<span class="text-sm text-green-700">Months to Break Even:</span>
 								<span class="text-lg font-bold text-green-900">
-									{outputs.months_to_breakeven.toFixed(1)} months
+									{outputs.monthsToBreakeven.toFixed(1)} months
 								</span>
 							</div>
 						{/if}
