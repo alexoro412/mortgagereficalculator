@@ -1,0 +1,28 @@
+<script lang="ts">
+	interface Props {
+		id: string;
+		label: string;
+		value: string;
+		oninput: (e: Event) => void;
+	}
+
+	let { id, label, value, oninput }: Props = $props();
+</script>
+
+<div>
+	<label for={id} class="mb-2 block text-sm font-medium text-gray-700">
+		{label}
+	</label>
+	<div class="relative">
+		<input
+			{id}
+			type="text"
+			{value}
+			{oninput}
+			class="block w-full rounded-md border-0 px-3 py-2 pr-8 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
+		/>
+		<span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500">
+			%
+		</span>
+	</div>
+</div>

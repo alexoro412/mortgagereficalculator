@@ -1,4 +1,11 @@
 <script lang="ts">
+	import CurrencyInput from '$lib/components/CurrencyInput.svelte';
+	import PercentInput from '$lib/components/PercentInput.svelte';
+	import NumberInput from '$lib/components/NumberInput.svelte';
+	import InputSection from '$lib/components/InputSection.svelte';
+	import Card from '$lib/components/Card.svelte';
+	import OutputRow from '$lib/components/OutputRow.svelte';
+
 	// ===== TYPE DEFINITIONS =====
 
 	type CurrencyField = 'originalLoanSize' | 'downPayment';
@@ -230,6 +237,12 @@
 	// ===== DERIVED STATE =====
 
 	let outputs = $derived<CalculationResults>(calculate(inputs));
+
+	// ===== HELPER FUNCTIONS =====
+
+	function formatCurrencyOutput(value: number): string {
+		return `$${value.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}`;
+	}
 </script>
 
 <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -241,291 +254,119 @@
 		<!-- Left Column: Inputs -->
 		<div class="space-y-6">
 			<!-- Current Mortgage Section -->
-			<div class="max-w-md rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
-				<h2 class="mb-4 text-xl font-semibold text-gray-900">Current Mortgage</h2>
-				<div class="max-w-xs space-y-4">
-					<div>
-						<label for="originalLoanSize" class="mb-2 block text-sm font-medium text-gray-700">
-							Original Loan Size
-						</label>
-						<div class="relative">
-							<span
-								class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"
-							>
-								$
-							</span>
-							<input
-								id="originalLoanSize"
-								type="text"
-								value={displayValues.originalLoanSize}
-								oninput={(e) => handleCurrencyInput('originalLoanSize', e)}
-								class="block w-full rounded-md border-0 py-2 pr-3 pl-8 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
+			<InputSection title="Current Mortgage">
+				<CurrencyInput
+					id="originalLoanSize"
+					label="Original Loan Size"
+					value={displayValues.originalLoanSize}
+					oninput={(e) => handleCurrencyInput('originalLoanSize', e)}
+				/>
 
-					<div>
-						<label for="originalLoanTerm" class="mb-2 block text-sm font-medium text-gray-700">
-							Original Loan Term
-						</label>
-						<div class="relative">
-							<input
-								id="originalLoanTerm"
-								type="number"
-								bind:value={inputs.originalLoanTerm}
-								class="block w-full rounded-md border-0 px-3 py-2 pr-16 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-							/>
-							<span
-								class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-							>
-								years
-							</span>
-						</div>
-					</div>
+				<NumberInput
+					id="originalLoanTerm"
+					label="Original Loan Term"
+					bind:value={inputs.originalLoanTerm}
+					unit="years"
+				/>
 
-					<div>
-						<label for="rate" class="mb-2 block text-sm font-medium text-gray-700">
-							Interest Rate
-						</label>
-						<div class="relative">
-							<input
-								id="rate"
-								type="text"
-								value={displayValues.rate}
-								oninput={(e) => handlePercentInput('rate', e)}
-								class="block w-full rounded-md border-0 px-3 py-2 pr-8 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-							/>
-							<span
-								class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-							>
-								%
-							</span>
-						</div>
-					</div>
+				<PercentInput
+					id="rate"
+					label="Interest Rate"
+					value={displayValues.rate}
+					oninput={(e) => handlePercentInput('rate', e)}
+				/>
 
-					<div>
-						<label for="monthsPaid" class="mb-2 block text-sm font-medium text-gray-700">
-							Months Already Paid
-						</label>
-						<div class="relative">
-							<input
-								id="monthsPaid"
-								type="number"
-								bind:value={inputs.monthsPaid}
-								class="block w-full rounded-md border-0 px-3 py-2 pr-20 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-							/>
-							<span
-								class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-							>
-								months
-							</span>
-						</div>
-					</div>
+				<NumberInput
+					id="monthsPaid"
+					label="Months Already Paid"
+					bind:value={inputs.monthsPaid}
+					unit="months"
+				/>
 
-					<div>
-						<label for="downPayment" class="mb-2 block text-sm font-medium text-gray-700">
-							Down Payment
-						</label>
-						<div class="relative">
-							<span
-								class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"
-							>
-								$
-							</span>
-							<input
-								id="downPayment"
-								type="text"
-								value={displayValues.downPayment}
-								oninput={(e) => handleCurrencyInput('downPayment', e)}
-								class="block w-full rounded-md border-0 py-2 pr-3 pl-8 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-							/>
-						</div>
-					</div>
-				</div>
-			</div>
+				<CurrencyInput
+					id="downPayment"
+					label="Down Payment"
+					value={displayValues.downPayment}
+					oninput={(e) => handleCurrencyInput('downPayment', e)}
+				/>
+			</InputSection>
 
 			<!-- Refinance Options Section -->
-			<div class="max-w-md rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
-				<h2 class="mb-4 text-xl font-semibold text-gray-900">Refinance Options</h2>
-				<div class="max-w-xs space-y-4">
-					<div>
-						<label for="newRate" class="mb-2 block text-sm font-medium text-gray-700">
-							New Interest Rate
-						</label>
-						<div class="relative">
-							<input
-								id="newRate"
-								type="text"
-								value={displayValues.newRate}
-								oninput={(e) => handlePercentInput('newRate', e)}
-								class="block w-full rounded-md border-0 px-3 py-2 pr-8 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-							/>
-							<span
-								class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-							>
-								%
-							</span>
-						</div>
-					</div>
+			<InputSection title="Refinance Options">
+				<PercentInput
+					id="newRate"
+					label="New Interest Rate"
+					value={displayValues.newRate}
+					oninput={(e) => handlePercentInput('newRate', e)}
+				/>
 
-					<div>
-						<label for="newTerm" class="mb-2 block text-sm font-medium text-gray-700">
-							New Loan Term
-						</label>
-						<div class="relative">
-							<input
-								id="newTerm"
-								type="number"
-								bind:value={inputs.newTerm}
-								class="block w-full rounded-md border-0 px-3 py-2 pr-16 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-							/>
-							<span
-								class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-							>
-								years
-							</span>
-						</div>
-					</div>
+				<NumberInput
+					id="newTerm"
+					label="New Loan Term"
+					bind:value={inputs.newTerm}
+					unit="years"
+				/>
 
-					<div>
-						<label for="refiCostRate" class="mb-2 block text-sm font-medium text-gray-700">
-							Refi Cost Rate
-						</label>
-						<div class="relative">
-							<input
-								id="refiCostRate"
-								type="text"
-								value={displayValues.refiCostRate}
-								oninput={(e) => handlePercentInput('refiCostRate', e)}
-								class="block w-full rounded-md border-0 px-3 py-2 pr-8 text-gray-900 shadow-sm ring-1 ring-gray-300 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-indigo-600 focus:ring-inset sm:text-sm sm:leading-6"
-							/>
-							<span
-								class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
-							>
-								%
-							</span>
-						</div>
-					</div>
-				</div>
-			</div>
+				<PercentInput
+					id="refiCostRate"
+					label="Refi Cost Rate"
+					value={displayValues.refiCostRate}
+					oninput={(e) => handlePercentInput('refiCostRate', e)}
+				/>
+			</InputSection>
 		</div>
 
 		<!-- Right Column: Results -->
 		<div class="space-y-6">
-			<div class="space-y-6">
-				<!-- Current Mortgage -->
-				<div class="max-w-md rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
-					<h3 class="mb-4 text-lg font-semibold text-gray-900">Current Mortgage</h3>
-					<div class="space-y-3">
-						<div class="flex items-baseline justify-between gap-4">
-							<span class="text-sm text-gray-600">Original Monthly Payment:</span>
-							<span class="text-lg font-semibold text-gray-900">
-								${outputs.originalMonthlyPayment.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
-							</span>
-						</div>
-						<div class="flex items-baseline justify-between gap-4">
-							<span class="text-sm text-gray-600">Current Mortgage Balance:</span>
-							<span class="text-lg font-semibold text-gray-900">
-								${outputs.currentMortgageBalance.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
-							</span>
-						</div>
-						<div class="flex items-baseline justify-between gap-4">
-							<span class="text-sm text-gray-600">Current Equity:</span>
-							<span class="text-lg font-semibold text-gray-900">
-								${outputs.currentEquity.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
-							</span>
-						</div>
+			<!-- Current Mortgage -->
+			<Card title="Current Mortgage">
+				<OutputRow label="Original Monthly Payment:" value={formatCurrencyOutput(outputs.originalMonthlyPayment)} />
+				<OutputRow label="Current Mortgage Balance:" value={formatCurrencyOutput(outputs.currentMortgageBalance)} />
+				<OutputRow label="Current Equity:" value={formatCurrencyOutput(outputs.currentEquity)} />
+			</Card>
+
+			<!-- Refinance Details -->
+			<Card title="Refinance Details">
+				<OutputRow label="New Loan Size:" value={formatCurrencyOutput(outputs.newLoanSize)} />
+				<OutputRow label="Refinance Cost:" value={formatCurrencyOutput(outputs.refiCost)} />
+				<OutputRow label="New Monthly Payment:" value={formatCurrencyOutput(outputs.newMonthlyPayment)} />
+			</Card>
+
+			<!-- Savings Analysis -->
+			<Card
+				title={outputs.monthlySavings > 0 ? 'Savings Analysis' : 'Cost Analysis'}
+				class={outputs.monthlySavings > 0
+					? 'bg-gradient-to-br from-green-50 to-emerald-50 ring-green-200'
+					: 'bg-gradient-to-br from-red-50 to-rose-50 ring-red-200'}
+			>
+				{#if outputs.monthlySavings <= 0}
+					<div class="mb-4 rounded-md border border-red-200 bg-red-100 p-3">
+						<p class="text-sm text-red-800">
+							⚠️ <strong>Warning:</strong> This refinance will cost you more money.
+						</p>
 					</div>
-				</div>
+				{/if}
 
-				<!-- Refinance Details -->
-				<div class="max-w-md rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
-					<h3 class="mb-4 text-lg font-semibold text-gray-900">Refinance Details</h3>
-					<div class="space-y-3">
-						<div class="flex items-baseline justify-between gap-4">
-							<span class="text-sm text-gray-600">New Loan Size:</span>
-							<span class="text-lg font-semibold text-gray-900">
-								${outputs.newLoanSize.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
-							</span>
-						</div>
-						<div class="flex items-baseline justify-between gap-4">
-							<span class="text-sm text-gray-600">Refinance Cost:</span>
-							<span class="text-lg font-semibold text-gray-900">
-								${outputs.refiCost.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
-							</span>
-						</div>
-						<div class="flex items-baseline justify-between gap-4">
-							<span class="text-sm text-gray-600">New Monthly Payment:</span>
-							<span class="text-lg font-semibold text-gray-900">
-								${outputs.newMonthlyPayment.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
-							</span>
-						</div>
-					</div>
-				</div>
+				<OutputRow
+					label={outputs.monthlySavings > 0 ? 'Monthly Savings:' : 'Monthly Cost:'}
+					value={formatCurrencyOutput(Math.abs(outputs.monthlySavings))}
+					valueClass="text-lg font-bold {outputs.monthlySavings > 0 ? 'text-green-900' : 'text-red-900'}"
+				/>
 
-				<!-- Savings Analysis -->
-				<div
-					class="max-w-md rounded-lg p-6 shadow-sm ring-1 {outputs.monthlySavings > 0
-						? 'bg-gradient-to-br from-green-50 to-emerald-50 ring-green-200'
-						: 'bg-gradient-to-br from-red-50 to-rose-50 ring-red-200'}"
-				>
-					<h3
-						class="mb-4 text-lg font-semibold {outputs.monthlySavings > 0
-							? 'text-green-900'
-							: 'text-red-900'}"
-					>
-						{outputs.monthlySavings > 0 ? 'Savings Analysis' : 'Cost Analysis'}
-					</h3>
+				<OutputRow
+					label={outputs.monthlySavings > 0 ? 'Total Savings:' : 'Total Cost:'}
+					value={formatCurrencyOutput(Math.abs(outputs.totalSavings))}
+					valueClass="text-lg font-bold {outputs.monthlySavings > 0 ? 'text-green-900' : 'text-red-900'}"
+				/>
 
-					{#if outputs.monthlySavings <= 0}
-						<div class="mb-4 rounded-md border border-red-200 bg-red-100 p-3">
-							<p class="text-sm text-red-800">
-								⚠️ <strong>Warning:</strong> This refinance will cost you more money.
-							</p>
-						</div>
-					{/if}
-
-					<div class="space-y-3">
-						<div class="flex items-baseline justify-between gap-4">
-							<span
-								class="text-sm {outputs.monthlySavings > 0 ? 'text-green-700' : 'text-red-700'}"
-								>{outputs.monthlySavings > 0 ? 'Monthly Savings:' : 'Monthly Cost:'}</span
-							>
-							<span
-								class="text-lg font-bold {outputs.monthlySavings > 0
-									? 'text-green-900'
-									: 'text-red-900'}"
-							>
-								${Math.abs(outputs.monthlySavings).toLocaleString(
-									'en-US',
-									CURRENCY_FORMAT_OPTIONS
-								)}
-							</span>
-						</div>
-						<div class="flex items-baseline justify-between gap-4">
-							<span
-								class="text-sm {outputs.monthlySavings > 0 ? 'text-green-700' : 'text-red-700'}"
-								>{outputs.monthlySavings > 0 ? 'Total Savings:' : 'Total Cost:'}</span
-							>
-							<span
-								class="text-lg font-bold {outputs.monthlySavings > 0
-									? 'text-green-900'
-									: 'text-red-900'}"
-							>
-								${Math.abs(outputs.totalSavings).toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}
-							</span>
-						</div>
-						{#if outputs.monthlySavings > 0}
-							<div class="flex items-baseline justify-between gap-4">
-								<span class="text-sm text-green-700">Months to Break Even:</span>
-								<span class="text-lg font-bold text-green-900">
-									{outputs.monthsToBreakeven.toFixed(1)} months
-								</span>
-							</div>
-						{/if}
-					</div>
-				</div>
-			</div>
+				{#if outputs.monthlySavings > 0}
+					<OutputRow
+						label="Months to Break Even:"
+						value="{outputs.monthsToBreakeven.toFixed(1)} months"
+						valueClass="text-lg font-bold text-green-900"
+					/>
+				{/if}
+			</Card>
 		</div>
 	</div>
 </main>
