@@ -337,7 +337,7 @@
 				<div class="max-w-md rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
 					<h3 class="mb-4 text-lg font-semibold text-gray-900">Current Mortgage</h3>
 					<div class="space-y-3">
-						<div class="flex items-baseline justify-between">
+						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">Original Monthly Payment:</span>
 							<span class="text-lg font-semibold text-gray-900">
 								${outputs.original_monthly_payment.toLocaleString('en-US', {
@@ -346,7 +346,7 @@
 								})}
 							</span>
 						</div>
-						<div class="flex items-baseline justify-between">
+						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">Current Mortgage Balance:</span>
 							<span class="text-lg font-semibold text-gray-900">
 								${outputs.current_mortgage_balance.toLocaleString('en-US', {
@@ -355,7 +355,7 @@
 								})}
 							</span>
 						</div>
-						<div class="flex items-baseline justify-between">
+						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">Current Equity:</span>
 							<span class="text-lg font-semibold text-gray-900">
 								${outputs.current_equity.toLocaleString('en-US', {
@@ -371,7 +371,7 @@
 				<div class="max-w-md rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
 					<h3 class="mb-4 text-lg font-semibold text-gray-900">Refinance Details</h3>
 					<div class="space-y-3">
-						<div class="flex items-baseline justify-between">
+						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">New Loan Size:</span>
 							<span class="text-lg font-semibold text-gray-900">
 								${outputs.new_loan_size.toLocaleString('en-US', {
@@ -380,7 +380,7 @@
 								})}
 							</span>
 						</div>
-						<div class="flex items-baseline justify-between">
+						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">Refinance Cost:</span>
 							<span class="text-lg font-semibold text-gray-900">
 								${outputs.refi_cost.toLocaleString('en-US', {
@@ -389,7 +389,7 @@
 								})}
 							</span>
 						</div>
-						<div class="flex items-baseline justify-between">
+						<div class="flex items-baseline justify-between gap-4">
 							<span class="text-sm text-gray-600">New Monthly Payment:</span>
 							<span class="text-lg font-semibold text-gray-900">
 								${outputs.new_monthly_payment.toLocaleString('en-US', {
@@ -418,14 +418,13 @@
 					{#if outputs.monthly_savings <= 0}
 						<div class="mb-4 rounded-md border border-red-200 bg-red-100 p-3">
 							<p class="text-sm text-red-800">
-								⚠️ <strong>Warning:</strong> This refinance will cost you more money. You should not
-								refinance with these terms.
+								⚠️ <strong>Warning:</strong> This refinance will cost you more money.
 							</p>
 						</div>
 					{/if}
 
 					<div class="space-y-3">
-						<div class="flex items-baseline justify-between">
+						<div class="flex items-baseline justify-between gap-4">
 							<span
 								class="text-sm {outputs.monthly_savings > 0 ? 'text-green-700' : 'text-red-700'}"
 								>{outputs.monthly_savings > 0 ? 'Monthly Savings:' : 'Monthly Cost:'}</span
@@ -441,7 +440,7 @@
 								})}
 							</span>
 						</div>
-						<div class="flex items-baseline justify-between">
+						<div class="flex items-baseline justify-between gap-4">
 							<span
 								class="text-sm {outputs.monthly_savings > 0 ? 'text-green-700' : 'text-red-700'}"
 								>{outputs.monthly_savings > 0 ? 'Total Savings:' : 'Total Cost:'}</span
@@ -458,7 +457,7 @@
 							</span>
 						</div>
 						{#if outputs.monthly_savings > 0}
-							<div class="flex items-baseline justify-between">
+							<div class="flex items-baseline justify-between gap-4">
 								<span class="text-sm text-green-700">Months to Break Even:</span>
 								<span class="text-lg font-bold text-green-900">
 									{outputs.months_to_breakeven.toFixed(1)} months
