@@ -295,7 +295,7 @@
 	});
 </script>
 
-<div class="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-emerald-50 animate-gradient">
+<div class="min-h-screen bg-emerald-100">
 	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 		<!-- Frog Fact Toast -->
 		{#if currentFact}
@@ -447,18 +447,6 @@
 </div>
 
 <style>
-	@keyframes gradient {
-		0% {
-			background-position: 0% 50%;
-		}
-		50% {
-			background-position: 100% 50%;
-		}
-		100% {
-			background-position: 0% 50%;
-		}
-	}
-
 	@keyframes slide-in {
 		from {
 			transform: translateX(100%);
@@ -468,11 +456,6 @@
 			transform: translateX(0);
 			opacity: 1;
 		}
-	}
-
-	:global(.animate-gradient) {
-		background-size: 200% 200%;
-		animation: gradient 15s ease infinite;
 	}
 
 	:global(.animate-slide-in) {
