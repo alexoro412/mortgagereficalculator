@@ -176,8 +176,8 @@
 		return value.toLocaleString('en-US');
 	}
 
-	function parseCurrency(str: string): number {
-		return parseFloat(str.replace(COMMA_REGEX, '')) || 0;
+	function parseCurrency(str: string): number | null {
+		return parseFloat(str.replace(COMMA_REGEX, ''));
 	}
 
 	// ===== STATE MANAGEMENT =====
@@ -207,28 +207,38 @@
 		const target = event.target as HTMLInputElement;
 		const cursorPos = target.selectionStart || 0;
 		const oldValue = displayValues[field];
-
-		// Count commas before cursor in old value
-		const commasBeforeCursor = (oldValue.slice(0, cursorPos).match(/,/g) || []).length;
-
 		const numericValue = parseCurrency(target.value);
-		inputs[field] = numericValue;
-		displayValues[field] = formatCurrency(numericValue);
 
-		// Restore cursor position accounting for comma changes
-		// Find position in new value that has the same number of non-comma characters before it
+		if (numericValue == null || isNaN(numericValue)) {
+			inputs[field] = 0;
+			displayValues[field] = '';
+		} else {
+			inputs[field] = numericValue;
+			displayValues[field] = formatCurrency(numericValue);
+		}
+
 		const newValue = displayValues[field];
-		let nonCommaCount = 0;
-		let newCursorPos = 0;
+
+		let oldCursorPos;
+		if (oldValue.length > newValue.length) {
+			oldCursorPos = cursorPos;
+		} else {
+			oldCursorPos = cursorPos;
+		}
+		const commasBeforeCursor = (oldValue.slice(0, oldCursorPos).match(/,/g) || []).length;
 		const targetNonCommaCount = cursorPos - commasBeforeCursor;
 
-		for (let i = 0; i < newValue.length; i++) {
-			if (newValue[i] !== ',') {
-				nonCommaCount++;
-			}
-			if (nonCommaCount >= targetNonCommaCount) {
-				newCursorPos = i + 1;
-				break;
+		let newCursorPos = cursorPos;
+		if (targetNonCommaCount > 0 && oldValue !== newValue) {
+			let nonCommaCount = 0;
+			for (let i = 0; i < newValue.length; i++) {
+				if (newValue[i] !== ',') {
+					nonCommaCount++;
+				}
+				if (nonCommaCount >= targetNonCommaCount) {
+					newCursorPos = i + 1;
+					break;
+				}
 			}
 		}
 
@@ -341,7 +351,7 @@
 					<CurrencyInput
 						id="originalLoanSize"
 						label="Original Loan Size"
-						value={displayValues.originalLoanSize}
+						bind:value={displayValues.originalLoanSize}
 						oninput={(e) => handleCurrencyInput('originalLoanSize', e)}
 						min={0}
 					/>
@@ -373,7 +383,7 @@
 					<CurrencyInput
 						id="downPayment"
 						label="Down Payment"
-						value={displayValues.downPayment}
+						bind:value={displayValues.downPayment}
 						oninput={(e) => handleCurrencyInput('downPayment', e)}
 						min={0}
 					/>
