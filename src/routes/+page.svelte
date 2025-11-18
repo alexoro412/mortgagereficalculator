@@ -180,15 +180,6 @@
 		return parseFloat(str.replace(COMMA_REGEX, '')) || 0;
 	}
 
-	function formatPercent(value: number): string {
-		return (value * 100).toString();
-	}
-
-	function parsePercent(str: string): number {
-		const num = parseFloat(str.replace(PERCENT_REGEX, '')) || 0;
-		return num / 100;
-	}
-
 	// ===== STATE MANAGEMENT =====
 
 	let inputs = $state<MortgageInputs>({
@@ -215,15 +206,32 @@
 	function handleCurrencyInput(field: CurrencyField, event: Event): void {
 		const target = event.target as HTMLInputElement;
 		const cursorPos = target.selectionStart || 0;
-		const oldLength = displayValues[field].length;
+		const oldValue = displayValues[field];
+
+		// Count commas before cursor in old value
+		const commasBeforeCursor = (oldValue.slice(0, cursorPos).match(/,/g) || []).length;
 
 		const numericValue = parseCurrency(target.value);
 		inputs[field] = numericValue;
 		displayValues[field] = formatCurrency(numericValue);
 
 		// Restore cursor position accounting for comma changes
-		const newLength = displayValues[field].length;
-		const newCursorPos = cursorPos + (newLength - oldLength);
+		// Find position in new value that has the same number of non-comma characters before it
+		const newValue = displayValues[field];
+		let nonCommaCount = 0;
+		let newCursorPos = 0;
+		const targetNonCommaCount = cursorPos - commasBeforeCursor;
+
+		for (let i = 0; i < newValue.length; i++) {
+			if (newValue[i] !== ',') {
+				nonCommaCount++;
+			}
+			if (nonCommaCount >= targetNonCommaCount) {
+				newCursorPos = i + 1;
+				break;
+			}
+		}
+
 		requestAnimationFrame(() => {
 			target.setSelectionRange(newCursorPos, newCursorPos);
 		});
