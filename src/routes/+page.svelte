@@ -207,8 +207,20 @@
 		const target = event.target as HTMLInputElement;
 		const cursorPos = target.selectionStart || 0;
 		const oldValue = displayValues[field];
-		const numericValue = parseCurrency(target.value);
 
+		// Don't allow non numeric inputs
+		const allowedCharacters = /^[,0-9]*$/g;
+		if (target.value.match(allowedCharacters) === null) {
+			const newCursorPos = (target.selectionStart || 1) - 1;
+
+			requestAnimationFrame(() => {
+				target.value = oldValue;
+				target.setSelectionRange(newCursorPos, newCursorPos);
+			});
+			return;
+		}
+
+		const numericValue = parseCurrency(target.value);
 		if (numericValue == null || isNaN(numericValue)) {
 			inputs[field] = 0;
 			displayValues[field] = '';
@@ -219,16 +231,15 @@
 
 		const newValue = displayValues[field];
 
-		let oldCursorPos;
-		if (oldValue.length > newValue.length) {
-			oldCursorPos = cursorPos;
-		} else {
-			oldCursorPos = cursorPos;
+		let oldCursorPos = cursorPos;
+		if (oldValue.length <= target.value.length) {
+			oldCursorPos = cursorPos - 1;
 		}
+
 		const commasBeforeCursor = (oldValue.slice(0, oldCursorPos).match(/,/g) || []).length;
 		const targetNonCommaCount = cursorPos - commasBeforeCursor;
 
-		let newCursorPos = cursorPos;
+		let newCursorPos = oldCursorPos;
 		if (targetNonCommaCount > 0 && oldValue !== newValue) {
 			let nonCommaCount = 0;
 			for (let i = 0; i < newValue.length; i++) {
@@ -243,6 +254,7 @@
 		}
 
 		requestAnimationFrame(() => {
+			target.value = newValue;
 			target.setSelectionRange(newCursorPos, newCursorPos);
 		});
 	}
@@ -351,7 +363,7 @@
 					<CurrencyInput
 						id="originalLoanSize"
 						label="Original Loan Size"
-						bind:value={displayValues.originalLoanSize}
+						value={displayValues.originalLoanSize}
 						oninput={(e) => handleCurrencyInput('originalLoanSize', e)}
 						min={0}
 					/>
@@ -383,7 +395,7 @@
 					<CurrencyInput
 						id="downPayment"
 						label="Down Payment"
-						bind:value={displayValues.downPayment}
+						value={displayValues.downPayment}
 						oninput={(e) => handleCurrencyInput('downPayment', e)}
 						min={0}
 					/>
