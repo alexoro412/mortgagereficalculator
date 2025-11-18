@@ -333,7 +333,7 @@
 			</h1>
 		</div>
 
-		<div class="flex flex-col gap-8 lg:flex-row lg:items-start">
+		<div class="flex flex-col gap-8 md:flex-row md:items-start">
 			<!-- Left Column: Inputs -->
 			<div class="space-y-6">
 				<!-- Current Mortgage Section -->
