@@ -150,10 +150,10 @@
 
 		// Total savings over the remaining life of the original loan
 		const remainingMonthsOnOriginalLoan = originalLoanTerm * MONTHS_PER_YEAR - monthsPaid;
-		const totalSavings =
-			remainingMonthsOnOriginalLoan * originalMonthlyPayment -
-			refiCost -
-			newMonthlyPayment * newTerm * MONTHS_PER_YEAR;
+
+		const costOfCurrentMortgage = remainingMonthsOnOriginalLoan * originalMonthlyPayment;
+		const costOfNewMortgage = newMonthlyPayment * newTerm * MONTHS_PER_YEAR;
+		const totalSavings = costOfCurrentMortgage - refiCost - costOfNewMortgage;
 
 		const monthsToBreakeven = refiCost / monthlySavings;
 
