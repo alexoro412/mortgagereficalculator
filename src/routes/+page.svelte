@@ -434,12 +434,20 @@
 
 				<!-- Savings Analysis -->
 				<Card
-					title={outputs.monthlySavings > 0 ? 'Savings Analysis' : 'Cost Analysis'}
-					class={outputs.monthlySavings > 0
+					title={outputs.totalSavings > 0 ? 'Savings Analysis' : 'Cost Analysis'}
+					class={outputs.totalSavings > 0
 						? 'bg-gradient-to-br from-green-50 to-emerald-50 ring-green-200'
 						: 'bg-gradient-to-br from-red-50 to-rose-50 ring-red-200'}
 				>
-					{#if outputs.monthlySavings <= 0}
+					{#if outputs.totalSavings <= 0 && outputs.monthlySavings > 0}
+						<div class="mb-4 rounded-md border border-red-200 bg-red-100 p-3">
+							<p class="text-sm text-red-800">
+								⚠️ <strong>Warning:</strong> This refinance will save on your monthly payment, but in
+								the long run it will still cost more. This is likely because your current mortgage is
+								close to maturity.
+							</p>
+						</div>
+					{:else if outputs.totalSavings <= 0}
 						<div class="mb-4 rounded-md border border-red-200 bg-red-100 p-3">
 							<p class="text-sm text-red-800">
 								⚠️ <strong>Warning:</strong> This refinance will cost you more money.
@@ -456,14 +464,14 @@
 					/>
 
 					<OutputRow
-						label={outputs.monthlySavings > 0 ? 'Total Savings:' : 'Total Cost:'}
+						label={outputs.totalSavings > 0 ? 'Total Savings:' : 'Total Cost:'}
 						value={formatCurrencyOutput(Math.abs(outputs.totalSavings))}
-						valueClass="text-lg font-bold {outputs.monthlySavings > 0
+						valueClass="text-lg font-bold {outputs.totalSavings > 0
 							? 'text-green-900'
 							: 'text-red-900'}"
 					/>
 
-					{#if outputs.monthlySavings > 0}
+					{#if outputs.totalSavings > 0}
 						<OutputRow
 							label="Months to Break Even:"
 							value="{outputs.monthsToBreakeven.toFixed(1)} months"
