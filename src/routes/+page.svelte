@@ -6,6 +6,7 @@
 	import Card from '$lib/components/Card.svelte';
 	import OutputRow from '$lib/components/OutputRow.svelte';
 	import MortgageChart from '$lib/components/MortgageChart.svelte';
+	import { formatCurrency, parseCurrency } from '$lib/utils/formatting';
 	import { onMount } from 'svelte';
 
 	// ===== TYPE DEFINITIONS =====
@@ -47,12 +48,7 @@
 	// ===== CONSTANTS =====
 
 	const MONTHS_PER_YEAR = 12;
-	const COMMA_REGEX = /,/g;
 	const PERCENT_REGEX = /%/g;
-	const CURRENCY_FORMAT_OPTIONS: Intl.NumberFormatOptions = {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2
-	};
 
 	// ===== FINANCIAL CALCULATIONS =====
 
@@ -208,20 +204,6 @@
 		};
 	}
 
-	// ===== FORMATTING UTILITIES =====
-
-	function formatCurrency(value: number): string {
-		return value.toLocaleString('en-US');
-	}
-
-	function formatCurrencyOutput(value: number): string {
-		return `$${value.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}`;
-	}
-
-	function parseCurrency(str: string): number | null {
-		return parseFloat(str.replace(COMMA_REGEX, ''));
-	}
-
 	// ===== STATE MANAGEMENT =====
 
 	let inputs = $state<MortgageInputs>({
@@ -268,7 +250,7 @@
 			displayValues[field] = '';
 		} else {
 			inputs[field] = numericValue;
-			displayValues[field] = formatCurrency(numericValue);
+			displayValues[field] = numericValue.toLocaleString('en-US');
 		}
 
 		const newValue = displayValues[field];
@@ -549,22 +531,22 @@
 				<Card title="Current Mortgage">
 					<OutputRow
 						label="Original Monthly Payment:"
-						value={formatCurrencyOutput(outputs.originalMonthlyPayment)}
+						value={formatCurrency(outputs.originalMonthlyPayment)}
 					/>
 					<OutputRow
 						label="Current Mortgage Balance:"
-						value={formatCurrencyOutput(outputs.currentMortgageBalance)}
+						value={formatCurrency(outputs.currentMortgageBalance)}
 					/>
-					<OutputRow label="Current Equity:" value={formatCurrencyOutput(outputs.currentEquity)} />
+					<OutputRow label="Current Equity:" value={formatCurrency(outputs.currentEquity)} />
 				</Card>
 
 				<!-- Refinance Details -->
 				<Card title="Refinance Details">
-					<OutputRow label="New Loan Size:" value={formatCurrencyOutput(outputs.newLoanSize)} />
-					<OutputRow label="Refinance Cost:" value={formatCurrencyOutput(outputs.refiCost)} />
+					<OutputRow label="New Loan Size:" value={formatCurrency(outputs.newLoanSize)} />
+					<OutputRow label="Refinance Cost:" value={formatCurrency(outputs.refiCost)} />
 					<OutputRow
 						label="New Monthly Payment:"
-						value={formatCurrencyOutput(outputs.newMonthlyPayment)}
+						value={formatCurrency(outputs.newMonthlyPayment)}
 					/>
 				</Card>
 
@@ -593,7 +575,7 @@
 
 					<OutputRow
 						label={outputs.monthlySavings > 0 ? 'Monthly Savings:' : 'Monthly Cost:'}
-						value={formatCurrencyOutput(Math.abs(outputs.monthlySavings))}
+						value={formatCurrency(Math.abs(outputs.monthlySavings))}
 						valueClass="text-lg font-bold {outputs.monthlySavings > 0
 							? 'text-green-900'
 							: 'text-red-900'}"
@@ -601,7 +583,7 @@
 
 					<OutputRow
 						label={outputs.totalSavings > 0 ? 'Total Savings:' : 'Total Cost:'}
-						value={formatCurrencyOutput(Math.abs(outputs.totalSavings))}
+						value={formatCurrency(Math.abs(outputs.totalSavings))}
 						valueClass="text-lg font-bold {outputs.totalSavings > 0
 							? 'text-green-900'
 							: 'text-red-900'}"

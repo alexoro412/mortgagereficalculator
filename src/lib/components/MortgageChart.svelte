@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import * as echarts from 'echarts';
 	import type { ECharts } from 'echarts';
+	import { formatCurrencyShort } from '$lib/utils/formatting';
 
 	interface ChartDataPoint {
 		month: number;
@@ -56,7 +57,7 @@
 				}
 			},
 			grid: {
-				left: '3%',
+				left: '6%',
 				right: '4%',
 				bottom: '15%',
 				top: '15%',
@@ -84,7 +85,7 @@
 				},
 				axisLabel: {
 					formatter: (value: number) => {
-						return '$' + (value / 1000).toFixed(0) + 'k';
+						return formatCurrencyShort(value);
 					}
 				}
 			},
