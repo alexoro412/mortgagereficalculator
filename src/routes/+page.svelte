@@ -469,9 +469,9 @@
 			</h1>
 		</div>
 
-		<div class="flex flex-col gap-8 md:flex-row md:items-start">
+		<div class="flex flex-col gap-8 lg:flex-row lg:items-start">
 			<!-- Left Column: Inputs -->
-			<div class="space-y-6">
+			<div class="space-y-6 lg:w-84">
 				<!-- Current Mortgage Section -->
 				<InputSection title="Current Mortgage">
 					<CurrencyInput
@@ -543,8 +543,8 @@
 				</InputSection>
 			</div>
 
-			<!-- Right Column: Results -->
-			<div class="space-y-6">
+			<!-- Middle Column: Results -->
+			<div class="space-y-6 lg:w-84">
 				<!-- Current Mortgage -->
 				<Card title="Current Mortgage">
 					<OutputRow
@@ -617,7 +617,8 @@
 				</Card>
 			</div>
 
-			<div class="">
+			<!-- Right Column: Chart -->
+			<div class="min-w-96 flex-1 flex-shrink-0">
 				<MortgageChart
 					currentMortgageData={chartData.currentMortgage}
 					refinanceData={chartData.refinance}

@@ -154,6 +154,8 @@
 	});
 </script>
 
-<div class="w-full rounded-lg bg-white p-6 shadow-sm ring-1 lg:max-w-lg">
+<div
+	class="w-full rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:ring-2"
+>
 	<div bind:this={chartContainer} class="h-96"></div>
 </div>
