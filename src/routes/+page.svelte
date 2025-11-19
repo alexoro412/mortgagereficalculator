@@ -106,10 +106,47 @@
 		return presentValue;
 	}
 
+	function calculateCumulativeAmountPaid(
+		remainingBalance: number,
+		monthsLeft: number,
+		annualRate: number,
+		monthlyPayment: number,
+		amountAlreadyPaid: number
+	): Array<number> {
+		const cumulativeAmounts: number[] = [];
+		let currentBalance = remainingBalance;
+		let cumulativeTotal = amountAlreadyPaid;
+		const monthlyRate = annualRate / 12;
+
+		for (let month = 0; month < monthsLeft; month++) {
+			// If balance is paid off, stop
+			if (currentBalance <= 0) {
+				break;
+			}
+
+			// Calculate interest for this month
+			const interestPayment = currentBalance * monthlyRate;
+
+			// Calculate principal payment
+			const principalPayment = monthlyPayment - interestPayment;
+
+			// Add to cumulative total
+			cumulativeTotal += monthlyPayment;
+
+			// Reduce balance
+			currentBalance -= principalPayment;
+
+			// Store cumulative amount
+			cumulativeAmounts.push(cumulativeTotal);
+		}
+
+		return cumulativeAmounts;
+	}
+
 	/**
 	 * Calculate refinance analysis
 	 */
-	function calculate(inputs: MortgageInputs): CalculationResults {
+	function calculateRefinanceSavings(inputs: MortgageInputs): CalculationResults {
 		const {
 			originalLoanSize,
 			originalLoanTerm,
@@ -274,7 +311,7 @@
 
 	// ===== DERIVED STATE =====
 
-	let outputs = $derived<CalculationResults>(calculate(inputs));
+	let outputs = $derived<CalculationResults>(calculateRefinanceSavings(inputs));
 
 	// ===== FROG FACTS EASTER EGG =====
 
