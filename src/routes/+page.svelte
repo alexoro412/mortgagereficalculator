@@ -176,6 +176,10 @@
 		return value.toLocaleString('en-US');
 	}
 
+	function formatCurrencyOutput(value: number): string {
+		return `$${value.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}`;
+	}
+
 	function parseCurrency(str: string): number | null {
 		return parseFloat(str.replace(COMMA_REGEX, ''));
 	}
@@ -271,12 +275,6 @@
 	// ===== DERIVED STATE =====
 
 	let outputs = $derived<CalculationResults>(calculate(inputs));
-
-	// ===== HELPER FUNCTIONS =====
-
-	function formatCurrencyOutput(value: number): string {
-		return `$${value.toLocaleString('en-US', CURRENCY_FORMAT_OPTIONS)}`;
-	}
 
 	// ===== FROG FACTS EASTER EGG =====
 
