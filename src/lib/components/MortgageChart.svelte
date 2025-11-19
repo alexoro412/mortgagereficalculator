@@ -65,7 +65,7 @@
 			},
 			xAxis: {
 				type: 'category',
-				data: currentMortgageData.map((d) => (d.month / 12).toFixed(1)),
+				data: currentMortgageData.map((d) => Math.floor(d.month / 12)),
 				name: 'Years from Start',
 				nameLocation: 'middle',
 				nameGap: 30,
