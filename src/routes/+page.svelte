@@ -5,6 +5,7 @@
 	import InputSection from '$lib/components/InputSection.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import OutputRow from '$lib/components/OutputRow.svelte';
+	import MortgageChart from '$lib/components/MortgageChart.svelte';
 	import { onMount } from 'svelte';
 
 	// ===== TYPE DEFINITIONS =====
@@ -313,6 +314,84 @@
 
 	let outputs = $derived<CalculationResults>(calculateRefinanceSavings(inputs));
 
+	// ===== CHART DATA =====
+
+	interface ChartDataPoint {
+		month: number;
+		value: number;
+	}
+
+	let chartData = $derived.by<{
+		currentMortgage: ChartDataPoint[];
+		refinance: ChartDataPoint[];
+	}>(() => {
+		const remainingMonthsOriginal = inputs.originalLoanTerm * MONTHS_PER_YEAR - inputs.monthsPaid;
+		const amountAlreadyPaid = inputs.monthsPaid * outputs.originalMonthlyPayment;
+
+		// Calculate cumulative amounts for current mortgage scenario
+		const currentMortgageCumulative = calculateCumulativeAmountPaid(
+			outputs.currentMortgageBalance,
+			remainingMonthsOriginal,
+			inputs.rate,
+			outputs.originalMonthlyPayment,
+			amountAlreadyPaid
+		);
+
+		// Calculate cumulative amounts for refinance scenario
+		// Include refi cost in the amount already paid
+		const refiCumulative = calculateCumulativeAmountPaid(
+			outputs.newLoanSize,
+			inputs.newTerm * MONTHS_PER_YEAR,
+			inputs.newRate,
+			outputs.newMonthlyPayment,
+			amountAlreadyPaid + outputs.refiCost
+		);
+
+		// Determine the maximum number of months to display
+		const maxMonths = Math.max(currentMortgageCumulative.length, refiCumulative.length);
+
+		// Prepare data for chart
+		const currentMortgageData: ChartDataPoint[] = [];
+		const refinanceData: ChartDataPoint[] = [];
+
+		for (let i = 0; i < maxMonths; i++) {
+			const month = inputs.monthsPaid + i + 1;
+
+			// Add current mortgage data point
+			if (i < currentMortgageCumulative.length) {
+				currentMortgageData.push({
+					month,
+					value: currentMortgageCumulative[i]
+				});
+			} else {
+				// If mortgage is paid off, keep last value
+				currentMortgageData.push({
+					month,
+					value: currentMortgageCumulative[currentMortgageCumulative.length - 1]
+				});
+			}
+
+			// Add refinance data point
+			if (i < refiCumulative.length) {
+				refinanceData.push({
+					month,
+					value: refiCumulative[i]
+				});
+			} else {
+				// If mortgage is paid off, keep last value
+				refinanceData.push({
+					month,
+					value: refiCumulative[refiCumulative.length - 1]
+				});
+			}
+		}
+
+		return {
+			currentMortgage: currentMortgageData,
+			refinance: refinanceData
+		};
+	});
+
 	// ===== FROG FACTS EASTER EGG =====
 
 	const FROG_FACTS = [
@@ -536,6 +615,14 @@
 						/>
 					{/if}
 				</Card>
+			</div>
+
+			<div class="">
+				<MortgageChart
+					currentMortgageData={chartData.currentMortgage}
+					refinanceData={chartData.refinance}
+					isSavings={outputs.totalSavings > 0}
+				/>
 			</div>
 		</div>
 	</main>
